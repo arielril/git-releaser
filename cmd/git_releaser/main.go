@@ -1,6 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"git-releaser/internal/integrations/gitlab"
+	"os"
+	"strconv"
+
+	_ "github.com/joho/godotenv/autoload"
+)
 
 /*
  * Steps:
@@ -11,5 +17,16 @@ import "fmt"
  * 4. Run for the hug :D
  */
 func main() {
-	fmt.Println("This is git releaser :D")
+	pvtToken := os.Getenv("PERSONAL_TOKEN")
+	gitUrl := os.Getenv("GITLAB_URL")
+
+	gl := gitlab.New(gitUrl, pvtToken)
+	projId, _ := strconv.ParseInt(os.Getenv("PROJECT_ID"), 10, 0)
+	proj := gitlab.NewProject(int(projId), "", "", "", gl)
+
+	proj.SubmitMergeRequest(&gitlab.MergeRequestOptions{
+		SourceBranch: "develop",
+		TargetBranch: "master",
+		Title:        "Automatic release of 1.0.0",
+	})
 }
