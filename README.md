@@ -2,6 +2,14 @@
 
 Project that creates release merge requests at GitLab
 
+```md
+ * Steps:
+ * 1. Get the project url
+ * 2. If the GitLab API allows
+ * 2.1. Send an API request to create the merge request from develop -> master
+ * 3. Send some notification
+ * 4. Run for the hug :D
+```
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
