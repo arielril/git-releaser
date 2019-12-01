@@ -26,6 +26,7 @@ const (
 func New(baseUrl, pvtToken string) (gl *gitlab) {
 	instance := http.New(baseUrl)
 	instance.Config.Headers.Set("Authorization", fmt.Sprintf("Bearer %v", pvtToken))
+	instance.Config.ResponseInterceptors = append(instance.Config.ResponseInterceptors, ParseErrorResponse)
 
 	projs := make([]Project, 0)
 

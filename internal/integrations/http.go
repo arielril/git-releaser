@@ -15,7 +15,7 @@ func httpStats(resp *axios.Response) (err error) {
 	stats["status"] = resp.Status
 	stats["headers"] = config.Headers
 
-	stats["req_body"] = config.Body
+	stats["req_body"] = fmt.Sprintf("%#v", config.Body)
 
 	ht := config.HTTPTrace
 	var timeline interface{}
@@ -25,7 +25,7 @@ func httpStats(resp *axios.Response) (err error) {
 		stats["reused"] = ht.Reused
 	}
 	fmt.Printf("%#v\nTimeline:%#v\n", stats, timeline)
-	return nil
+	return
 }
 
 func New(baseUrl string) (instance *axios.Instance) {

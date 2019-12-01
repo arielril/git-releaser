@@ -1,0 +1,17 @@
+gitlab:
+  url: 'https://your.gitlab/url'
+
+user:
+  personalToken: <your_personal_token>
+
+project:
+  id: the_id_of_the_project
+  name: the_name_of_the_project
+  branches:
+    develop: development_branch
+    master: production_branch
+
+telegram:
+  url: https://your.telegram.api/url
+  botToken: <your_bot_token>
+  groupId: The group or chat id to send the notification

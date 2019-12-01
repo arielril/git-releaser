@@ -1,8 +1,6 @@
 package gitlab
 
 import (
-	"encoding/json"
-	"fmt"
 	"strconv"
 
 	"github.com/vicanso/go-axios"
@@ -21,7 +19,7 @@ type (
 	}
 
 	MergeRequest interface {
-		Submit(mr *axios.Instance)
+		Submit(mr *axios.Instance) (mrResult *mergeRequestResponse, err error)
 	}
 )
 
@@ -33,25 +31,21 @@ func NewMergeRequest(projId int, opts *MergeRequestOptions) (mr MergeRequest) {
 	return
 }
 
-func (mr *mergeRequest) Submit(instance *axios.Instance) {
-	projId := strconv.Itoa(mr.ProjectId)
+func (mr *mergeRequest) Submit(instance *axios.Instance) (mrResult *mergeRequestResponse, err error) {
 	reqConfig := &axios.Config{
 		Method: "POST",
 		URL:    projectMergeRequestPath,
 		Params: map[string]string{
-			"proj_id": projId,
+			"proj_id": strconv.Itoa(mr.ProjectId),
 		},
 		Body: mr.Options,
 	}
 
 	res, err := instance.Request(reqConfig)
 
-	if err != nil {
-		fmt.Println("Error requesting gitlab:", err)
-		return
+	if err == nil {
+		_ = res.JSON(&mrResult)
 	}
 
-	var parsedRes interface{}
-	_ = json.Unmarshal(res.Data, parsedRes)
-	fmt.Printf("gitlab response: %#v\n", parsedRes)
+	return
 }
