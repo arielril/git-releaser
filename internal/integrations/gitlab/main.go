@@ -11,13 +11,13 @@ import (
 type (
 	gitlab struct {
 		instance *axios.Instance
-		Projects []Project
+		Projects []IProject
 	}
 
 	Gitlab interface {
 		GetInstance() *axios.Instance
-		AddProject(proj Project)
-		ListOwnedProjects() (projs []*project, err error)
+		AddProject(proj IProject)
+		ListOwnedProjects() (projs []*Project, err error)
 	}
 )
 
@@ -30,7 +30,7 @@ func New(baseUrl, pvtToken string) (gl *gitlab) {
 	instance.Config.Headers.Set("Authorization", fmt.Sprintf("Bearer %v", pvtToken))
 	instance.Config.ResponseInterceptors = append(instance.Config.ResponseInterceptors, ParseErrorResponse)
 
-	projs := make([]Project, 0)
+	projs := make([]IProject, 0)
 
 	gl = &gitlab{
 		instance: instance,
@@ -44,11 +44,11 @@ func (gl *gitlab) GetInstance() *axios.Instance {
 	return gl.instance
 }
 
-func (gl *gitlab) AddProject(proj Project) {
+func (gl *gitlab) AddProject(proj IProject) {
 	gl.Projects = append(gl.Projects, proj)
 }
 
-func (gl *gitlab) ListOwnedProjects() (projs []*project, err error) {
+func (gl *gitlab) ListOwnedProjects() (projs []*Project, err error) {
 	reqConfig := &axios.Config{
 		Method: "GET",
 		URL:    "/projects",

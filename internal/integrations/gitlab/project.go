@@ -8,26 +8,29 @@ import (
 )
 
 type (
-	project struct {
-		Id     int    `json:"id"`
-		Name   string `json:"name"`
-		Path   string `json:"path"`
-		WebUrl string `json:"web_url"`
-		MRs    []MergeRequest
-		gl     Gitlab
+	Project struct {
+		Id       int    `json:"id" yaml:"id"`
+		Name     string `json:"name" yaml:"name"`
+		WebUrl   string `json:"web_url" yaml:"webUrl"`
+		Branches struct {
+			Develop string `json:"-" yaml:"develop"`
+			Master  string `json:"-" yaml:"master"`
+		} `json:"-" yaml:"branches"`
+		MRs []MergeRequest
+		gl  Gitlab
 	}
 
-	Project interface {
+	IProject interface {
 		SubmitMergeRequest(options *MergeRequestOptions) (mrResult Response, err error)
+		SetGitlab(gl Gitlab)
 	}
 )
 
-func NewProject(id int, name, path, webUrl string, gitlab Gitlab) (p *project) {
+func NewProject(id int, name, webUrl string, gitlab Gitlab) (p *Project) {
 	mrs := make([]MergeRequest, 0)
-	p = &project{
+	p = &Project{
 		Id:     id,
 		Name:   name,
-		Path:   path,
 		WebUrl: webUrl,
 		MRs:    mrs,
 		gl:     gitlab,
@@ -36,7 +39,11 @@ func NewProject(id int, name, path, webUrl string, gitlab Gitlab) (p *project) {
 	return
 }
 
-func (p *project) MergeProject(extra *project) {
+func (p *Project) SetGitlab(gl Gitlab) {
+	p.gl = gl
+}
+
+func (p *Project) MergeProject(extra *Project) {
 	if p.Id == 0 {
 		p.Id = extra.Id
 	}
@@ -45,34 +52,30 @@ func (p *project) MergeProject(extra *project) {
 		p.Name = extra.Name
 	}
 
-	if p.Path == "" {
-		p.Path = extra.Path
-	}
-
 	if p.WebUrl == "" {
 		p.WebUrl = extra.WebUrl
 	}
 }
 
-func (p *project) findProjectByUrl() (proj *project, err error) {
+func (p *Project) findProjectByUrl() (proj *Project, err error) {
 	projs, err := p.gl.ListOwnedProjects()
 	fmt.Printf("Projects: %#v %#v\n\n", err, projs)
 	if err != nil {
 		return
 	}
 
-	finded, err := fp.Find(projs, func(proj *project, idx int) bool {
+	finded, err := fp.Find(projs, func(proj *Project, idx int) bool {
 		return proj.WebUrl == p.WebUrl
 	})
 
 	if finded != nil {
-		proj = finded.(*project)
+		proj = finded.(*Project)
 	}
 
 	return
 }
 
-func (p *project) SubmitMergeRequest(options *MergeRequestOptions) (mrResult Response, err error) {
+func (p *Project) SubmitMergeRequest(options *MergeRequestOptions) (mrResult Response, err error) {
 	if p.Id == 0 && p.WebUrl != "" {
 		proj, projErr := p.findProjectByUrl()
 
@@ -85,6 +88,14 @@ func (p *project) SubmitMergeRequest(options *MergeRequestOptions) (mrResult Res
 		}
 
 		p.MergeProject(proj)
+	}
+
+	if options.SourceBranch == "" {
+		options.SourceBranch = "develop"
+	}
+
+	if options.TargetBranch == "" {
+		options.TargetBranch = "master"
 	}
 
 	mr := NewMergeRequest(p.Id, options)

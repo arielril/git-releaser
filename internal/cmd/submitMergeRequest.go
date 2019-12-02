@@ -18,7 +18,7 @@ var (
 	}
 	telegramIntegration t.Telegram
 	gitlabIntegration   gitlab.Gitlab
-	project             gitlab.Project
+	projectList         gitlab.IProject
 )
 
 func init() {
@@ -28,18 +28,17 @@ func init() {
 }
 
 func configMergeRequest() {
-	if gitlabIntegration == nil {
-		pvtToken := viper.GetString("user.personalToken")
-		gitUrl := viper.GetString("gitlab.url")
-		gitlabIntegration = gitlab.New(gitUrl, pvtToken)
+	parseConfig(submitMergeRequest, submitMergeRequest.ArgAliases)
 
-		project = gitlab.NewProject(
-			viper.GetInt("project.id"),
-			viper.GetString("project.name"),
-			"",
-			viper.GetString("project.webUrl"),
-			gitlabIntegration,
+	if gitlabIntegration == nil {
+		gitlabIntegration = gitlab.New(
+			globalConfig.Gitlab.Url,
+			globalConfig.User.PersonalToken,
 		)
+
+		for _, proj := range globalConfig.Projects {
+			proj.SetGitlab(gitlabIntegration)
+		}
 	}
 
 	if telegramIntegration == nil {
@@ -63,15 +62,17 @@ func notify(res gitlab.Response, err error) {
 }
 
 func run(cmd *cobra.Command, args []string) error {
-	mrRes, err := project.SubmitMergeRequest(&gitlab.MergeRequestOptions{
-		SourceBranch: viper.GetString("project.branches.develop"),
-		TargetBranch: viper.GetString("project.branches.master"),
-		Title:        "Automatic release of 1.0.0",
-	})
-	defer notify(mrRes, err)
+	for _, project := range globalConfig.Projects {
+		mrRes, err := project.SubmitMergeRequest(&gitlab.MergeRequestOptions{
+			SourceBranch: project.Branches.Develop,
+			TargetBranch: project.Branches.Master,
+			Title:        "Automatic release of 1.0.0",
+		})
+		defer notify(mrRes, err)
 
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
