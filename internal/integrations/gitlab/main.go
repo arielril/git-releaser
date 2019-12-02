@@ -3,6 +3,7 @@ package gitlab
 import (
 	"fmt"
 	http "git-releaser/internal/integrations"
+	"net/url"
 
 	"github.com/vicanso/go-axios"
 )
@@ -16,6 +17,7 @@ type (
 	Gitlab interface {
 		GetInstance() *axios.Instance
 		AddProject(proj Project)
+		ListOwnedProjects() (projs []*project, err error)
 	}
 )
 
@@ -44,4 +46,22 @@ func (gl *gitlab) GetInstance() *axios.Instance {
 
 func (gl *gitlab) AddProject(proj Project) {
 	gl.Projects = append(gl.Projects, proj)
+}
+
+func (gl *gitlab) ListOwnedProjects() (projs []*project, err error) {
+	reqConfig := &axios.Config{
+		Method: "GET",
+		URL:    "/projects",
+		Query: url.Values{
+			"owned":  []string{"true"},
+			"simple": []string{"true"},
+		},
+	}
+
+	res, err := gl.instance.Request(reqConfig)
+
+	if err == nil {
+		_ = res.JSON(&projs)
+	}
+	return
 }

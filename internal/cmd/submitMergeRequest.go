@@ -33,7 +33,13 @@ func configMergeRequest() {
 		gitUrl := viper.GetString("gitlab.url")
 		gitlabIntegration = gitlab.New(gitUrl, pvtToken)
 
-		project = gitlab.NewProject(viper.GetInt("project.id"), viper.GetString("project.name"), "", "", gitlabIntegration)
+		project = gitlab.NewProject(
+			viper.GetInt("project.id"),
+			viper.GetString("project.name"),
+			"",
+			viper.GetString("project.webUrl"),
+			gitlabIntegration,
+		)
 	}
 
 	if telegramIntegration == nil {

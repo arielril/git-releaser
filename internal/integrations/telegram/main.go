@@ -1,7 +1,6 @@
 package telegram
 
 import (
-	"fmt"
 	http "git-releaser/internal/integrations"
 
 	"github.com/vicanso/go-axios"
@@ -63,7 +62,7 @@ func (t *telegram) SendMessage(to, text string) (err error) {
 	if err == nil {
 		var telRes interface{}
 		_ = res.JSON(&telRes)
-		fmt.Printf("Telegram Response: %#v\n\n", telRes)
+		// fmt.Printf("Telegram Response: %#v\n\n", telRes)
 	}
 
 	return
