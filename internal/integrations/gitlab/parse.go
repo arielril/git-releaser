@@ -25,6 +25,10 @@ type (
 		Changes     int    `json:"changes_count,omitempty,string"`
 		CreatedAt   string `json:"created_at"`
 	}
+
+	Response interface {
+		String() string
+	}
 )
 
 func (er errorResponse) String() string {

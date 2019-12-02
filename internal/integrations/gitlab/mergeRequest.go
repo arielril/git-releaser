@@ -19,7 +19,7 @@ type (
 	}
 
 	MergeRequest interface {
-		Submit(mr *axios.Instance) (mrResult *mergeRequestResponse, err error)
+		Submit(mr *axios.Instance) (mrResult Response, err error)
 	}
 )
 
@@ -31,7 +31,7 @@ func NewMergeRequest(projId int, opts *MergeRequestOptions) (mr MergeRequest) {
 	return
 }
 
-func (mr *mergeRequest) Submit(instance *axios.Instance) (mrResult *mergeRequestResponse, err error) {
+func (mr *mergeRequest) Submit(instance *axios.Instance) (mrResult Response, err error) {
 	reqConfig := &axios.Config{
 		Method: "POST",
 		URL:    projectMergeRequestPath,
@@ -44,7 +44,9 @@ func (mr *mergeRequest) Submit(instance *axios.Instance) (mrResult *mergeRequest
 	res, err := instance.Request(reqConfig)
 
 	if err == nil {
-		_ = res.JSON(&mrResult)
+		var mrRes *mergeRequestResponse
+		_ = res.JSON(&mrRes)
+		mrResult = mrRes
 	}
 
 	return

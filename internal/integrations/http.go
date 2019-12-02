@@ -18,13 +18,13 @@ func httpStats(resp *axios.Response) (err error) {
 	stats["req_body"] = fmt.Sprintf("%#v", config.Body)
 
 	ht := config.HTTPTrace
-	var timeline interface{}
+	// var timeline interface{}
 	if ht != nil {
-		timeline = config.HTTPTrace.Stats()
+		// timeline = config.HTTPTrace.Stats()
 		stats["addr"] = ht.Addr
 		stats["reused"] = ht.Reused
 	}
-	fmt.Printf("%#v\nTimeline:%#v\n", stats, timeline)
+	// fmt.Printf("%#v\nTimeline:%#v\n", stats, timeline)
 	return
 }
 

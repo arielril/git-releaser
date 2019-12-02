@@ -42,23 +42,27 @@ func configMergeRequest() {
 	}
 }
 
+func notify(res gitlab.Response, err error) {
+	if err != nil {
+		return
+	}
+
+	if err = telegramIntegration.SendMessage(
+		viper.GetString("telegram.groupId"),
+		res.String(),
+	); err != nil {
+		fmt.Printf("Failed to send notification. %#v\n", err)
+	}
+	return
+}
+
 func run(cmd *cobra.Command, args []string) error {
 	mrRes, err := project.SubmitMergeRequest(&gitlab.MergeRequestOptions{
 		SourceBranch: viper.GetString("project.branches.develop"),
 		TargetBranch: viper.GetString("project.branches.master"),
 		Title:        "Automatic release of 1.0.0",
 	})
-
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("Merge request result: %#v\n\n", mrRes)
-	// Notify in the group
-	err = telegramIntegration.SendMessage(
-		viper.GetString("telegram.groupId"),
-		mrRes.String(),
-	)
+	defer notify(mrRes, err)
 
 	if err != nil {
 		return err

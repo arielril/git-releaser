@@ -11,7 +11,7 @@ type (
 	}
 
 	Project interface {
-		SubmitMergeRequest(options *MergeRequestOptions) (mrResult *mergeRequestResponse, err error)
+		SubmitMergeRequest(options *MergeRequestOptions) (mrResult Response, err error)
 	}
 )
 
@@ -29,10 +29,14 @@ func NewProject(id int, name, path, webUrl string, gitlab Gitlab) (p *project) {
 	return
 }
 
-func (p *project) SubmitMergeRequest(options *MergeRequestOptions) (mrResult *mergeRequestResponse, err error) {
+func (p *project) SubmitMergeRequest(options *MergeRequestOptions) (mrResult Response, err error) {
 	mr := NewMergeRequest(p.Id, options)
 
 	mrResult, err = mr.Submit(p.gl.GetInstance())
-	mrResult.ProjectName = p.Name
+	if mrResult != nil {
+		mrRes := mrResult.(*mergeRequestResponse)
+		mrRes.ProjectName = p.Name
+		mrResult = mrRes
+	}
 	return
 }

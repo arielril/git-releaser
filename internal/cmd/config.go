@@ -18,7 +18,6 @@ var showConfigCmd = &cobra.Command{
 			return fmt.Errorf("Failed to parse config: %v", err)
 		}
 
-		fmt.Printf("Configs %#v\n\n", config)
 		return nil
 	},
 }
